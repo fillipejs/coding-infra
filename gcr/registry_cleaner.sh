@@ -34,7 +34,8 @@ function dealWithUntagedImages (){
     # Check the condition for deleting untaged images
     if [ $month_passed -gt $DAYS ]
     then
-     echo "The image $image is untaged and not pushed since $DAYS days, since it will be deleted" >> thisshouldbedeleted_
+     echo "The image $image is untaged and not pushed since $DAYS days, so it will be deleted" >> thisshouldbedeleted_
+     #gcloud container images delete $image -q
     fi
   done
 }
@@ -56,7 +57,8 @@ function dealWithTagedImages () {
     condition_override=$(expr $DAYS \* 2)
     if [ $month_passed -gt $condition_override ]
     then
-     echo "The image $image is taged but not pushed since $DAYS days, since it will be deleted" >> thisshouldbedeleted_
+     echo "The image $image is taged but not pushed since $condition_override days, so it will be deleted" >> thisshouldbedeleted_
+     #gcloud container images delete $image -q
     fi
   done
 }
@@ -76,8 +78,8 @@ main(){
   for repository in `cat repositorys_`
   do
     # Separate tagged and untaged images from the repository
-    gcloud beta container images list-tags --show-occurrences $REGISTRY$repository --format=json --filter='NOT tags:*' | jq '.[] | select(.DISCOVERY[].kind== "DISCOVERY") | "\(.DISCOVERY[].resourceUrl) \(.DISCOVERY[].updateTime)"' > untaged_images_
-    gcloud beta container images list-tags --show-occurrences $REGISTRY$repository --format=json --filter='tags:*' | jq '.[] | select(.DISCOVERY[].kind== "DISCOVERY") | "\(.DISCOVERY[].resourceUrl) \(.DISCOVERY[].updateTime)"' > taged_images_
+    gcloud beta container images list-tags --show-occurrences $REGISTRY$repository --format=json --filter='NOT tags:*' | jq '.[] | select(.DISCOVERY[].kind== "DISCOVERY") | "\(.DISCOVERY[].resourceUrl) \(.DISCOVERY[].updateTime)"' | sed 's/https:\/\/*//' > untaged_images_
+    gcloud beta container images list-tags --show-occurrences $REGISTRY$repository --format=json --filter='tags:*' | jq '.[] | select(.DISCOVERY[].kind== "DISCOVERY") | "\(.DISCOVERY[].resourceUrl) \(.DISCOVERY[].updateTime)"' | sed 's/https:\/\/*//' > taged_images_
 
     # Deal with each of them accordingly
     dealWithUntagedImages
