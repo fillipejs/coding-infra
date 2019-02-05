@@ -2,4 +2,4 @@
 
 This repo has the single purpouse of archiving files and scripts that I use and develop daily feel free to collaborate
 
-  . docker-registry: registry related files
+  . gcp: Google Cloud Plataform related scripts and files
